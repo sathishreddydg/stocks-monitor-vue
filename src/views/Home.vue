@@ -1,16 +1,19 @@
 <template>
   <div class="home">
     <stock-table/>
+    <small-chart></small-chart>
   </div>
 </template>
 
 <script>
-import StockTable from '@/components/StockTable.vue'
+import stockTable from '@/components/StockTable.vue'
+import smallChart from '@/components/SmallChart.vue'
 
 export default {
   name: 'home',
   components: {
-    StockTable
+    stockTable,
+    smallChart
   }
 }
 </script>
