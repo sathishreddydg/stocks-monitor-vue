@@ -13,44 +13,30 @@ export default {
         data = data.map(quote => quote.close)
         this.$chart.chart('container', {
           title: {
-            text: 'Monthly temperatures in a random cold place'
+            text: ''
           },
           subtitle: {
-            text: 'All series should be blue below zero'
+            text: ''
           },
           xAxis: {
-            type: 'datetime',
-            lineWidth: 0,
-            minorGridLineWidth: 0,
-            lineColor: 'transparent',
-
-            labels: {
-              enabled: false
-            },
-            minorTickLength: 0,
-            tickLength: 0
+            visible: false
           },
           yAxis: {
-            type: 'datetime',
-            lineWidth: 0,
-            gridLineWidth: 0,
-            lineColor: 'transparent',
-
-            labels: {
-              enabled: false
-            },
-            minorTickLength: 0,
-            tickLength: 0
+            visible: false
           },
           chart: {
             backgroundColor: 'rgab(0,0,0,1)'
           },
           credits: {
-            enabled: false, // Whether to show the credits text.
-            href: 'http://www.highcharts.com', // The URL for the credits label.
-            position: null, // Position configuration for the credtis label.
-            style: null, // CSS styles for the credits label.
-            text: 'Highcharts.com.' // The text for the credits label.
+            enabled: false
+          },
+          legend: {
+            enabled: false
+          },
+          navigation: {
+            buttonOptions: {
+              enabled: false
+            }
           },
           series: [{
             name: 'Area',
@@ -69,17 +55,17 @@ export default {
               },
               threshold: data[0],
               fillColor: {
-                linearGradient: [0, 0, 0, 200],
+                linearGradient: [0, 0, 0, 240],
                 stops: [
                   [0, 'rgba(0,255,0,1)'],
                   [1, 'rgba(0,255,0,0)']
                 ]
               },
               negativeFillColor: {
-                linearGradient: [0, 0, 0, 200],
+                linearGradient: [0, 0, 0, 350],
                 stops: [
-                  [0.7, 'rgba(255,0,0,0)'],
-                  [1, 'rgba(255,0,0,0.7)']
+                  [0.1, 'rgba(255,0,0,0)'],
+                  [1, 'rgba(255,0,0,1)']
                 ]
               }
             }
