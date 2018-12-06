@@ -9,45 +9,83 @@ export default {
   },
   methods: {
     createChart: function () {
-      this.$chart.chart('container', {
-        title: {
-          text: 'Monthly temperatures in a random cold place'
-        },
-        subtitle: {
-          text: 'All series should be blue below zero'
-        },
-        xAxis: {
-          type: 'datetime'
-        },
-        series: [{
-          name: 'Area',
-          type: 'area',
-          data: [3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0, -1, 0, 1, 2, 3],
-          pointStart: Date.UTC(2011, 0),
-          pointInterval: 30 * 24 * 36e5,
-          color: '#0f0',
-          negativeColor: '#f00'
-        }],
-        plotOptions: {
-          series: {
-            threshold: 3,
-            fillColor: {
-              linearGradient: [0, 0, 0, 250],
-              stops: [
-                [0, 'rgba(0,255,0,1)'],
-                [1, 'rgba(0,255,0,0)']
-              ]
+      this.$http.get('https://api.iextrading.com/1.0/stock/aapl/chart/1d').then(({ data }) => {
+        data = data.map(quote => quote.close)
+        this.$chart.chart('container', {
+          title: {
+            text: 'Monthly temperatures in a random cold place'
+          },
+          subtitle: {
+            text: 'All series should be blue below zero'
+          },
+          xAxis: {
+            type: 'datetime',
+            lineWidth: 0,
+            minorGridLineWidth: 0,
+            lineColor: 'transparent',
+
+            labels: {
+              enabled: false
             },
-            negativeFillColor: {
-              linearGradient: [0, 0, 0, 250],
-              stops: [
-                [0, 'rgba(255,0,0,0)'],
-                [1, 'rgba(255,0,0,1)']
-              ]
+            minorTickLength: 0,
+            tickLength: 0
+          },
+          yAxis: {
+            type: 'datetime',
+            lineWidth: 0,
+            gridLineWidth: 0,
+            lineColor: 'transparent',
+
+            labels: {
+              enabled: false
+            },
+            minorTickLength: 0,
+            tickLength: 0
+          },
+          chart: {
+            backgroundColor: 'rgab(0,0,0,1)'
+          },
+          credits: {
+            enabled: false, // Whether to show the credits text.
+            href: 'http://www.highcharts.com', // The URL for the credits label.
+            position: null, // Position configuration for the credtis label.
+            style: null, // CSS styles for the credits label.
+            text: 'Highcharts.com.' // The text for the credits label.
+          },
+          series: [{
+            name: 'Area',
+            type: 'area',
+            data: data,
+            pointStart: Date.UTC(2011, 0),
+            pointInterval: 30 * 24 * 36e5,
+            lineWidth: 1,
+            color: '#0f0',
+            negativeColor: '#f00'
+          }],
+          plotOptions: {
+            series: {
+              marker: {
+                enabled: false
+              },
+              threshold: data[0],
+              fillColor: {
+                linearGradient: [0, 0, 0, 200],
+                stops: [
+                  [0, 'rgba(0,255,0,1)'],
+                  [1, 'rgba(0,255,0,0)']
+                ]
+              },
+              negativeFillColor: {
+                linearGradient: [0, 0, 0, 200],
+                stops: [
+                  [0.7, 'rgba(255,0,0,0)'],
+                  [1, 'rgba(255,0,0,0.7)']
+                ]
+              }
             }
           }
-        }
-      })
+        })
+      }).catch(err => console.error(err))
     }
   },
   mounted: function () {
