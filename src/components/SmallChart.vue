@@ -19,6 +19,13 @@ export default {
           if (quote.marketClose || quote.close) {
             lastGoodValue = quote.marketClose || quote.close
           }
+          for (let i = 0; i < data.length; i++) {
+            if (!lastGoodValue) {
+              lastGoodValue = data[index + i].marketClose || data[index + i].close
+            } else {
+              break
+            }
+          }
           return lastGoodValue
         })
         this.$chart.chart(this.symbol, {
@@ -33,13 +40,17 @@ export default {
           },
           yAxis: {
             visible: false,
-            height: 200
+            height: 200,
+            tickPositioner: function () {
+              var maxDeviation = Math.max(this.dataMax - this.threshold, this.threshold - this.dataMin)
+              var halfMaxDeviation = maxDeviation / 2
+              return [this.threshold - maxDeviation, this.threshold - halfMaxDeviation, this.threshold, this.threshold + halfMaxDeviation, this.threshold + maxDeviation]
+            }
           },
           chart: {
             margin: 0,
             backgroundColor: 'rgab(1,1,1,0)',
-            height: 200,
-            width: 450
+            height: 200
           },
           credits: {
             enabled: false
@@ -56,6 +67,7 @@ export default {
             name: this.symbol,
             type: 'area',
             data: data,
+            // TODO: make it time
             pointStart: Date.UTC(2011, 0),
             pointInterval: 30 * 24 * 36e5,
             lineWidth: 1,
@@ -73,15 +85,6 @@ export default {
               negativeFillColor: 'rgba(255,0,0,0.2)'
             }
           }
-        }, chart => {
-          var ext = chart.yAxis[0].getExtremes()
-          console.log(chart.yAxis[0])
-          var dMax = Math.abs(ext.dataMax)
-          var dMin = Math.abs(ext.dataMin)
-          var dExt = dMax >= dMin ? dMax : dMin
-          var min = 2 * chart.yAxis[0].threshold - dExt
-          console.log(min, chart.yAxis[0].threshold, dExt)
-          chart.yAxis[0].setExtremes(min, dExt)
         })
       }).catch(err => console.error(err))
     }
