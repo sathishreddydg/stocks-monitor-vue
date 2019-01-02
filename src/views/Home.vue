@@ -15,13 +15,12 @@
 </template>
 
 <script>
-// import stockTable from '@/components/StockTable.vue'
 import smallChart from '@/components/SmallChart.vue'
+import io from 'socket.io-client'
 
 export default {
   name: 'home',
   components: {
-    // stockTable,
     smallChart
   },
   data: function () {
@@ -47,9 +46,9 @@ export default {
     },
 
     initialize: function () {
-      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'atvi', 'shop']
+      this.symbols = ['aapl', 'msft']//, 'fb','tsla','amd','amzn','goog','atvi','shop']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
-        this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
+        // this.symbols=this.symbols.concat(data.map(stock => stock.symbol))
         return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
       }).then(({ data }) => {
         this.stockData = Object.keys(data).map((key) => {
@@ -57,7 +56,8 @@ export default {
             quote: {
               symbol: data[key].quote.symbol,
               currentPrice: data[key].quote.latestPrice,
-              percent: this.getPercent(data[key].quote.latestPrice, data[key].quote.previousClose)
+              percent: this.getPercent(data[key].quote.latestPrice, data[key].quote.previousClose),
+              previousClose: data[key].quote.close
             },
             chartData: {
               symbol: data[key].quote.symbol,
@@ -66,17 +66,36 @@ export default {
             }
           }
         })
-        console.log(this.stockData)
+        this.initializeSocket()
       }).catch(err => console.error(err))
     },
 
+    initializeSocket: function () {
+      let socket = io('https://ws-api.iextrading.com/1.0/last')
+      socket.on('message', data => {
+        data = JSON.parse(data)
+        const index = this.stockData.findIndex(stock => stock.quote.symbol === data.symbol)
+        this.stockData[index].quote.currentPrice = data.price
+        this.stockData[index].quote.percent = this.getPercent(data.price, this.stockData[index].quote.previousClose)
+        // this.stockData[index].bid = data.bidPrice + ' x ' + data.bidSize
+        // this.stockData[index].ask = data.askPrice + ' x ' + data.askSize
+      })
+      socket.on('connect', () => {
+        socket.emit('subscribe', this.symbols.join(','))
+      })
+    },
+
     getPercent: function (current, previous) {
+      console.log(parseFloat(Math.round(((current - previous) / previous) * 100 * 100) / 100).toFixed(2))
       return parseFloat(Math.round(((current - previous) / previous) * 100 * 100) / 100).toFixed(2)
     }
   },
   created: function () {
     this.setDefaultChartDate()
     this.initialize()
+  },
+  mounted: function () {
+    // this.initializeSocket()
   }
 }
 </script>
