@@ -1,11 +1,32 @@
 <template>
   <div>
-    <!-- <stock-table/> -->
     <v-container grid-list-md ml-0 mr-0>
       <v-layout row wrap>
         <v-flex v-for="stock in stockData" :key="stock.quote.symbol" xs6 sm6>
           <v-card>
-            <span>{{stock.quote.symbol}} {{stock.quote.currentPrice}} {{stock.quote.percent}}</span>
+            <v-layout row wrap>
+              <v-flex xs2 sm2>
+                <span class="display-1">{{stock.quote.symbol}}</span> <br>
+                <span>{{stock.quote.companyName.length>22?stock.quote.companyName.substr(0,19)+'...':stock.quote.companyName}}</span>
+              </v-flex>
+              <v-flex xs2 sm2>
+                <v-layout row wrap>
+                  <v-flex xs12 sm12>
+                    <span class="headline">{{stock.quote.currentPrice}}</span>
+                  </v-flex>
+                  <v-flex xs12 sm12>
+                    <span class="subheading" :class="stock.quote.change<0?'red--text':'green--text'"><b>{{stock.quote.percent}}</b>% </span>
+                    <span class="body-1" :class="stock.quote.change<0?'red--text':'green--text'">&nbsp;({{stock.quote.change}})</span>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs7 sm7>
+
+              </v-flex>
+              <v-flex xs1 sm1>
+                <v-btn icon :href="'https://finance.yahoo.com/chart/'+stock.quote.symbol"><v-icon>send</v-icon></v-btn>
+              </v-flex>
+            </v-layout>
             <small-chart :chart-data='stock.chartData'></small-chart>
           </v-card>
         </v-flex>
@@ -46,22 +67,24 @@ export default {
     },
 
     initialize: function () {
-      this.symbols = ['aapl', 'msft']//, 'fb','tsla','amd','amzn','goog','atvi','shop']
+      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'atvi', 'shop']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
-        // this.symbols=this.symbols.concat(data.map(stock => stock.symbol))
+        this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
         return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
       }).then(({ data }) => {
         this.stockData = Object.keys(data).map((key) => {
           return {
             quote: {
               symbol: data[key].quote.symbol,
+              companyName: data[key].quote.companyName,
               currentPrice: data[key].quote.latestPrice,
+              change: parseFloat(Math.round((data[key].quote.latestPrice - data[key].quote.previousClose) * 100) / 100).toFixed(2),
               percent: this.getPercent(data[key].quote.latestPrice, data[key].quote.previousClose),
-              previousClose: data[key].quote.close
+              previousClose: data[key].quote.previousClose
             },
             chartData: {
               symbol: data[key].quote.symbol,
-              previousClose: data[key].quote.close,
+              previousClose: data[key].quote.previousClose,
               chart: data[key].chart
             }
           }
@@ -76,6 +99,7 @@ export default {
         data = JSON.parse(data)
         const index = this.stockData.findIndex(stock => stock.quote.symbol === data.symbol)
         this.stockData[index].quote.currentPrice = data.price
+        this.stockData[index].quote.change = parseFloat(Math.round((data.price - this.stockData[index].quote.previousClose) * 100) / 100).toFixed(2)
         this.stockData[index].quote.percent = this.getPercent(data.price, this.stockData[index].quote.previousClose)
         // this.stockData[index].bid = data.bidPrice + ' x ' + data.bidSize
         // this.stockData[index].ask = data.askPrice + ' x ' + data.askSize
