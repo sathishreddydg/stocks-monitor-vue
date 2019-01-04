@@ -14,8 +14,8 @@ export default {
     createChart: function () {
       let lastGoodValue
       let data = this.chartData.chart
-      let xData = this.chartData.chart.map(quote => quote.minute)
-      let symbol = this.chartData.symbol
+      let xData = this.chartData.chart.map(quote => quote.label)
+      // let symbol = this.chartData.symbol
       let previous = this.chartData.previousClose
       data = this.chartData.chart.map((quote, index) => {
         if (quote.marketClose || quote.close) {
@@ -62,21 +62,23 @@ export default {
           }
         },
         tooltip: {
-          positioner: function () {
-            console.log(this)
-            return { x: 0, y: 40 }
+          followPointer: true,
+          positioner: function (width, height, point) {
+            return { x: point.plotX < width + 10 ? this.chart.plotSizeX - width : 0, y: point.plotY < this.chart.plotSizeY / 2 ? this.chart.plotSizeY - height : 0 }
           },
           formatter: function () {
-            return '<b>' + symbol + '</b> at ' +
-            '<b>' + this.x + '</b><br>' +
-            '<b>' + this.y + '</b> (' +
-            '<p>' + parseFloat(Math.round(((this.y - previous) / previous) * 100 * 100) / 100).toFixed(2) + '%)</p>'
+            return '<small style="color: white">' + this.x + '</small><br>' +
+            '<b style="color: white ;font-weight:bold">' + this.y + '</b><br>' +
+            '<p style="color:  ' + (this.y - previous < 0 ? '#f00' : '#0f0') + ';">' + parseFloat(Math.round(((this.y - previous) / previous) * 100 * 100) / 100).toFixed(2) + '%</p> '
           },
-          shape: 'rect'
+          shape: 'rect',
+          shadow: false,
+          borderWidth: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)'
         },
         chart: {
           margin: 0,
-          backgroundColor: 'rgab(1,1,1,0)',
+          backgroundColor: '#0d0d0d',
           height: 200
         },
         credits: {

@@ -2,25 +2,9 @@
   <div>
     <v-container grid-list-md ml-0 mr-0>
       <v-layout row wrap>
-        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm4>
+        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm3>
           <v-card>
-            <v-layout row wrap>
-              <v-flex sm3>
-                <span class="headline">{{stock.quote.symbol}}</span> <br>
-                <span class="caption">{{stock.quote.companyName.length>20?stock.quote.companyName.substr(0,17)+'...':stock.quote.companyName}}</span>
-              </v-flex>
-              <v-flex sm3>
-                <span class="headline">{{stock.quote.currentPrice}}</span><br>
-                <span class="subheading" :class="stock.quote.change<0?'red--text':'green--text'"><b>{{stock.quote.percent}}</b>% </span>
-                <span class="body-1" :class="stock.quote.change<0?'red--text':'green--text'">&nbsp;({{stock.quote.change}})</span>
-              </v-flex>
-              <v-flex sm5>
-
-              </v-flex>
-              <v-flex sm1>
-                <v-btn icon :href="'https://finance.yahoo.com/chart/'+stock.quote.symbol" target="_blank"><v-icon>send</v-icon></v-btn>
-              </v-flex>
-            </v-layout>
+            <card-header :quote="stock.quote"></card-header>
             <small-chart :chart-data='stock.chartData'></small-chart>
           </v-card>
         </v-flex>
@@ -31,12 +15,14 @@
 
 <script>
 import smallChart from '@/components/SmallChart.vue'
+import CardHeader from '@/components/CardHeader'
 import io from 'socket.io-client'
 
 export default {
   name: 'home',
   components: {
-    smallChart
+    smallChart,
+    CardHeader
   },
   data: function () {
     return {
@@ -69,9 +55,9 @@ export default {
         this.stockData = Object.keys(data).map((key) => {
           return {
             quote: {
+              ...data[key].quote,
               symbol: data[key].quote.symbol,
               companyName: data[key].quote.companyName,
-              currentPrice: data[key].quote.latestPrice,
               change: parseFloat(Math.round((data[key].quote.latestPrice - data[key].quote.previousClose) * 100) / 100).toFixed(2),
               percent: this.getPercent(data[key].quote.latestPrice, data[key].quote.previousClose),
               previousClose: data[key].quote.previousClose
@@ -92,7 +78,7 @@ export default {
       socket.on('message', data => {
         data = JSON.parse(data)
         const index = this.stockData.findIndex(stock => stock.quote.symbol === data.symbol)
-        this.stockData[index].quote.currentPrice = data.price
+        this.stockData[index].quote.latestPrice = data.price
         this.stockData[index].quote.change = parseFloat(Math.round((data.price - this.stockData[index].quote.previousClose) * 100) / 100).toFixed(2)
         this.stockData[index].quote.percent = this.getPercent(data.price, this.stockData[index].quote.previousClose)
         // this.stockData[index].bid = data.bidPrice + ' x ' + data.bidSize
@@ -120,5 +106,18 @@ export default {
 <style scoped>
 .container{
   max-width: unset !important;
+  padding: 8px
+}
+.container.grid-list-md .layout .flex {
+    padding: 6px 4px;
+}
+.theme--dark.v-card {
+    background-color: #0d0d0d;
+}
+.red--text{
+  color: #f00 !important
+}
+.green--text{
+  color: #0f0 !important
 }
 </style>
