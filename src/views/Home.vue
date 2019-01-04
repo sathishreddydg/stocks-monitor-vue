@@ -2,29 +2,23 @@
   <div>
     <v-container grid-list-md ml-0 mr-0>
       <v-layout row wrap>
-        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" xs6 sm6>
+        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm4>
           <v-card>
             <v-layout row wrap>
-              <v-flex xs2 sm2>
-                <span class="display-1">{{stock.quote.symbol}}</span> <br>
-                <span>{{stock.quote.companyName.length>22?stock.quote.companyName.substr(0,19)+'...':stock.quote.companyName}}</span>
+              <v-flex sm3>
+                <span class="headline">{{stock.quote.symbol}}</span> <br>
+                <span class="caption">{{stock.quote.companyName.length>20?stock.quote.companyName.substr(0,17)+'...':stock.quote.companyName}}</span>
               </v-flex>
-              <v-flex xs2 sm2>
-                <v-layout row wrap>
-                  <v-flex xs12 sm12>
-                    <span class="headline">{{stock.quote.currentPrice}}</span>
-                  </v-flex>
-                  <v-flex xs12 sm12>
-                    <span class="subheading" :class="stock.quote.change<0?'red--text':'green--text'"><b>{{stock.quote.percent}}</b>% </span>
-                    <span class="body-1" :class="stock.quote.change<0?'red--text':'green--text'">&nbsp;({{stock.quote.change}})</span>
-                  </v-flex>
-                </v-layout>
+              <v-flex sm3>
+                <span class="headline">{{stock.quote.currentPrice}}</span><br>
+                <span class="subheading" :class="stock.quote.change<0?'red--text':'green--text'"><b>{{stock.quote.percent}}</b>% </span>
+                <span class="body-1" :class="stock.quote.change<0?'red--text':'green--text'">&nbsp;({{stock.quote.change}})</span>
               </v-flex>
-              <v-flex xs7 sm7>
+              <v-flex sm5>
 
               </v-flex>
-              <v-flex xs1 sm1>
-                <v-btn icon :href="'https://finance.yahoo.com/chart/'+stock.quote.symbol"><v-icon>send</v-icon></v-btn>
+              <v-flex sm1>
+                <v-btn icon :href="'https://finance.yahoo.com/chart/'+stock.quote.symbol" target="_blank"><v-icon>send</v-icon></v-btn>
               </v-flex>
             </v-layout>
             <small-chart :chart-data='stock.chartData'></small-chart>
@@ -67,7 +61,7 @@ export default {
     },
 
     initialize: function () {
-      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'atvi', 'shop']
+      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'nflx', 'shop']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
         this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
         return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
@@ -110,7 +104,6 @@ export default {
     },
 
     getPercent: function (current, previous) {
-      console.log(parseFloat(Math.round(((current - previous) / previous) * 100 * 100) / 100).toFixed(2))
       return parseFloat(Math.round(((current - previous) / previous) * 100 * 100) / 100).toFixed(2)
     }
   },
