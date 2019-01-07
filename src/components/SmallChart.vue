@@ -10,6 +10,11 @@ export default {
   data: function () {
     return {}
   },
+  watch: {
+    chartData: function () {
+      this.createChart()
+    }
+  },
   methods: {
     createChart: function () {
       let lastGoodValue

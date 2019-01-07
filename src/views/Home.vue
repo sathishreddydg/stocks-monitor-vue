@@ -2,7 +2,7 @@
   <div>
     <v-container grid-list-md ml-0 mr-0>
       <v-layout row wrap>
-        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm3>
+        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm4>
           <v-card>
             <card-header :quote="stock.quote"></card-header>
             <small-chart :chart-data='stock.chartData'></small-chart>
@@ -17,6 +17,7 @@
 import smallChart from '@/components/SmallChart.vue'
 import CardHeader from '@/components/CardHeader'
 import io from 'socket.io-client'
+import { setInterval, setTimeout } from 'timers'
 
 export default {
   name: 'home',
@@ -47,6 +48,7 @@ export default {
     },
 
     initialize: function () {
+      console.log('triggered', new Date().toLocaleString())
       this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'nflx', 'shop']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
         this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
@@ -69,6 +71,7 @@ export default {
             }
           }
         })
+        console.log(JSON.stringify(this.stockData[0].chartData.chart[this.stockData[0].chartData.chart.length - 1]))
         this.initializeSocket()
       }).catch(err => console.error(err))
     },
@@ -95,6 +98,9 @@ export default {
   },
   created: function () {
     this.setDefaultChartDate()
+    let interval = 60 * 1000 // 1 minute
+    let delay = (interval - new Date() % interval) + 2000 // Every Minute and 2 seconds
+    setTimeout(() => setInterval(this.initialize(), interval), delay)
     this.initialize()
   },
   mounted: function () {
