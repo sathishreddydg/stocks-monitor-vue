@@ -48,7 +48,6 @@ export default {
     },
 
     initialize: function () {
-      console.log('triggered', new Date().toLocaleString())
       this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'nflx', 'shop']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
         this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
@@ -71,7 +70,6 @@ export default {
             }
           }
         })
-        console.log(JSON.stringify(this.stockData[0].chartData.chart[this.stockData[0].chartData.chart.length - 1]))
         this.initializeSocket()
       }).catch(err => console.error(err))
     },
@@ -119,11 +117,5 @@ export default {
 }
 .theme--dark.v-card {
     background-color: #0d0d0d;
-}
-.red--text{
-  color: #f00 !important
-}
-.green--text{
-  color: #0f0 !important
 }
 </style>
