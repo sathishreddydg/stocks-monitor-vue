@@ -2,7 +2,7 @@
   <div>
     <v-container grid-list-md ml-0 mr-0>
       <v-layout row wrap>
-        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm4>
+        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm12 md6 xl4>
           <v-card>
             <card-header :quote="stock.quote"></card-header>
             <small-chart :chart-data='stock.chartData'></small-chart>
@@ -29,7 +29,8 @@ export default {
     return {
       symbols: [],
       chartRange: '1d',
-      stockData: []
+      stockData: [],
+      socket: null
     }
   },
 
@@ -70,23 +71,21 @@ export default {
             }
           }
         })
-        this.initializeSocket()
+        if (!(this.socket || {}).connected) { this.initializeSocket() }
       }).catch(err => console.error(err))
     },
 
     initializeSocket: function () {
-      let socket = io('https://ws-api.iextrading.com/1.0/last')
-      socket.on('message', data => {
+      this.socket = io('https://ws-api.iextrading.com/1.0/last')
+      this.socket.on('message', data => {
         data = JSON.parse(data)
         const index = this.stockData.findIndex(stock => stock.quote.symbol === data.symbol)
         this.stockData[index].quote.latestPrice = data.price
         this.stockData[index].quote.change = parseFloat(Math.round((data.price - this.stockData[index].quote.previousClose) * 100) / 100).toFixed(2)
         this.stockData[index].quote.percent = this.getPercent(data.price, this.stockData[index].quote.previousClose)
-        // this.stockData[index].bid = data.bidPrice + ' x ' + data.bidSize
-        // this.stockData[index].ask = data.askPrice + ' x ' + data.askSize
       })
-      socket.on('connect', () => {
-        socket.emit('subscribe', this.symbols.join(','))
+      this.socket.on('connect', () => {
+        this.socket.emit('subscribe', this.symbols.join(','))
       })
     },
 
@@ -95,14 +94,14 @@ export default {
     }
   },
   created: function () {
+    this.initialize()
     this.setDefaultChartDate()
     let interval = 60 * 1000 // 1 minute
     let delay = (interval - new Date() % interval) + 2000 // Every Minute and 2 seconds
-    setTimeout(() => setInterval(this.initialize(), interval), delay)
-    this.initialize()
-  },
-  mounted: function () {
-    // this.initializeSocket()
+    setTimeout(() => {
+      this.initialize()
+      setInterval(() => this.initialize(), interval)
+    }, delay)
   }
 }
 </script>
