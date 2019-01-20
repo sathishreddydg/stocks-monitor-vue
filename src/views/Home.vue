@@ -49,7 +49,7 @@ export default {
     },
 
     initialize: function () {
-      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'nflx', 'shop']
+      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'nflx', 'shop', 'roku']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
         this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
         return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
@@ -80,6 +80,7 @@ export default {
       this.socket.on('message', data => {
         data = JSON.parse(data)
         const index = this.stockData.findIndex(stock => stock.quote.symbol === data.symbol)
+        // TODO: The index of key may not be found if the the gainers is changed, bcz, the symbolds won't be subscribed
         this.stockData[index].quote.latestPrice = data.price
         this.stockData[index].quote.change = parseFloat(Math.round((data.price - this.stockData[index].quote.previousClose) * 100) / 100).toFixed(2)
         this.stockData[index].quote.percent = this.getPercent(data.price, this.stockData[index].quote.previousClose)

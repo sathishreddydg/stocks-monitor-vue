@@ -78,7 +78,7 @@ export default {
       },
       {
         value: 1E3,
-        symbol: 'k'
+        symbol: 'K'
       },
       {
         value: 1E6,
@@ -86,21 +86,12 @@ export default {
       },
       {
         value: 1E9,
-        symbol: 'G'
+        symbol: 'B'
       },
       {
         value: 1E12,
         symbol: 'T'
-      },
-      {
-        value: 1E15,
-        symbol: 'P'
-      },
-      {
-        value: 1E18,
-        symbol: 'E'
-      }
-      ]
+      }]
       var rx = /\.0+$|(\.[0-9]*[1-9])0+$/
       var i
       for (i = si.length - 1; i > 0; i--) {
