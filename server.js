@@ -28,7 +28,6 @@ app.get('/watchlists/:id', async (req, res) => {
 
 app.post('/watchlists/:id', async (req, res) => {
   res.setHeader('Content-Type', 'application/json')
-  console.log(req.body)
   try {
     db.collection('stocks-monitor-users').doc(req.params.id).set(req.body)
     res.sendStatus(200)
@@ -48,10 +47,10 @@ app.use(staticFileMiddleware)
 // ^ `app.use(staticFileMiddleware)` is included twice as per
 // https://github.com/bripkens/connect-history-api-fallback/blob/master/examples/static-files-and-index-rewrite/README.md#configuring-the-middleware
 
-app.get('/', function (req, res) {
+app.get('/*/', function (req, res) {
   res.render(path.join(__dirname, '/index.html'))
 })
-const PORT = process.env.PORT || 8083
+const PORT = process.env.PORT || 3000
 app.listen(PORT)
 
 console.log('Server running at http://localhost:' + PORT)

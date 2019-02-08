@@ -1,15 +1,13 @@
 <template>
   <div>
-    <v-container grid-list-md ml-0 mr-0>
-      <v-layout row wrap>
-        <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm12 md6 xl4>
-          <v-card>
-            <card-header :quote="stock.quote"></card-header>
-            <small-chart :chart-data='stock.chartData'></small-chart>
-          </v-card>
-        </v-flex>
-      </v-layout>
-    </v-container>
+    <v-layout row wrap>
+      <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm12 md6 xl3>
+        <v-card>
+          <card-header :quote="stock.quote"></card-header>
+          <small-chart :chart-data='stock.chartData'></small-chart>
+        </v-card>
+      </v-flex>
+    </v-layout>
   </div>
 </template>
 
@@ -49,9 +47,9 @@ export default {
     },
 
     initialize: function () {
-      this.symbols = ['aapl', 'msft', 'fb', 'tsla', 'amd', 'amzn', 'goog', 'nflx', 'shop', 'roku']
+      this.symbols = this.$store.state.watchlists['Watch Daily']
       this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
-        this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
+        // this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
         return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
       }).then(({ data }) => {
         this.stockData = Object.keys(data).map((key) => {
@@ -108,10 +106,6 @@ export default {
 </script>
 
 <style scoped>
-.container{
-  max-width: unset !important;
-  padding: 8px
-}
 .container.grid-list-md .layout .flex {
     padding: 6px 4px;
 }
