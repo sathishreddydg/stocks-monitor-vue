@@ -1,7 +1,7 @@
 <template>
-<div>
-<div :id="chartData.symbol"></div>
-</div>
+  <div>
+    <div :id="chartData.symbol"></div>
+  </div>
 </template>
 
 <script>
@@ -37,6 +37,7 @@ export default {
         }
         return lastGoodValue
       })
+      let threshold = this.chartData.chart[0].label === '09:30 AM' ? previous : data[0]
       this.$chart.chart(this.chartData.symbol, {
         title: {
           text: ''
@@ -121,7 +122,7 @@ export default {
                 }
               }
             },
-            threshold: this.chartData.previousClose,
+            threshold: threshold,
             softThreshold: false,
             fillColor: 'rgba(0,255,0,0.1)',
             negativeFillColor: 'rgba(255,0,0,0.1)'
