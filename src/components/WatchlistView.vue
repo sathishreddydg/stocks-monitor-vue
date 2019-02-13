@@ -22,22 +22,20 @@ export default {
     smallChart,
     CardHeader
   },
-  props: ['symbols'],
+  props: ['symbols', 'chartRange'],
   data: function () {
     return {
-      chartRange: '1d',
       stockData: [],
       socket: null
     }
   },
 
-  computed: {
-    canItBatch: function () {
-      return (new Date()).toISOString().split('T')[0].split('-').join('') === this.chartRange
-    }
-  },
   watch: {
     symbols: function () {
+      this.initialize()
+    },
+
+    chartRange: function () {
       this.initialize()
     }
   },
@@ -51,10 +49,10 @@ export default {
     },
 
     initialize: function () {
-      this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
-        // this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
-        return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
-      }).then(({ data }) => {
+      // this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
+      // this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
+      // })
+      this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=' + this.chartRange).then(({ data }) => {
         this.stockData = Object.keys(data).map((key) => {
           return {
             quote: {
@@ -97,7 +95,7 @@ export default {
   },
   created: function () {
     this.initialize()
-    this.setDefaultChartDate()
+    // this.setDefaultChartDate()
     let interval = 60 * 1000 // 1 minute
     let delay = (interval - new Date() % interval) + 2000 // Every Minute and 2 seconds
     setTimeout(() => {
