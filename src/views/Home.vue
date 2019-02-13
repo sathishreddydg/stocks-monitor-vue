@@ -1,106 +1,36 @@
 <template>
-  <div>
     <v-layout row wrap>
-      <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm12 md6 xl3>
-        <v-card>
-          <card-header :quote="stock.quote"></card-header>
-          <small-chart :chart-data='stock.chartData'></small-chart>
-        </v-card>
+      <v-flex sm12>
+        <nav-bar @select="symbols=$event"></nav-bar>
+      </v-flex>
+      <v-flex sm12 v-if="symbols">
+        <watchlist-view :symbols="symbols"></watchlist-view>
       </v-flex>
     </v-layout>
-  </div>
 </template>
 
 <script>
-import smallChart from '@/components/SmallChart.vue'
-import CardHeader from '@/components/CardHeader'
-import io from 'socket.io-client'
-import { setInterval, setTimeout } from 'timers'
+import WatchlistView from '@/components/WatchlistView.vue'
+import NavBar from '@/components/NavBar.vue'
 
 export default {
-  name: 'home',
   components: {
-    smallChart,
-    CardHeader
+    WatchlistView,
+    NavBar
   },
   data: function () {
     return {
-      symbols: [],
-      chartRange: '1d',
-      stockData: [],
-      socket: null
+      symbols: null
     }
   },
 
   computed: {
-    canItBatch: function () {
-      return (new Date()).toISOString().split('T')[0].split('-').join('') === this.chartRange
-    }
   },
 
   methods: {
-    // TODO: useful on market closing days
-    setDefaultChartDate: function () {
-      this.$http.get('https://api.iextrading.com/1.0/stock/aapl/quote').then(({ data }) => {
-        this.chartRange = (new Date(data.closeTime)).toISOString().split('T')[0].split('-').join('')
-      }).catch(err => console.error(err))
-    },
-
-    initialize: function () {
-      this.symbols = this.$store.state.watchlists['Watch Daily']
-      this.$http.get('https://api.iextrading.com/1.0/stock/market/list/gainers').then(({ data }) => {
-        // this.symbols = this.symbols.concat(data.map(stock => stock.symbol))
-        return this.$http.get('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + this.symbols.join(',') + '&types=quote,news,chart&range=1d')
-      }).then(({ data }) => {
-        this.stockData = Object.keys(data).map((key) => {
-          return {
-            quote: {
-              ...data[key].quote,
-              symbol: data[key].quote.symbol,
-              companyName: data[key].quote.companyName,
-              change: parseFloat(Math.round((data[key].quote.latestPrice - data[key].quote.previousClose) * 100) / 100).toFixed(2),
-              percent: this.getPercent(data[key].quote.latestPrice, data[key].quote.previousClose),
-              previousClose: data[key].quote.previousClose
-            },
-            chartData: {
-              symbol: data[key].quote.symbol,
-              previousClose: data[key].quote.previousClose,
-              chart: data[key].chart
-            }
-          }
-        })
-        if (!(this.socket || {}).connected) { this.initializeSocket() }
-      }).catch(err => console.error(err))
-    },
-
-    initializeSocket: function () {
-      this.socket = io('https://ws-api.iextrading.com/1.0/last')
-      this.socket.on('message', data => {
-        data = JSON.parse(data)
-        const index = this.stockData.findIndex(stock => stock.quote.symbol === data.symbol)
-        // TODO: The index of key may not be found if the the gainers is changed, bcz, the symbolds won't be subscribed
-        this.stockData[index].quote.latestPrice = data.price
-        this.stockData[index].quote.change = parseFloat(Math.round((data.price - this.stockData[index].quote.previousClose) * 100) / 100).toFixed(2)
-        this.stockData[index].quote.percent = this.getPercent(data.price, this.stockData[index].quote.previousClose)
-      })
-      this.socket.on('connect', () => {
-        this.socket.emit('subscribe', this.symbols.join(','))
-      })
-    },
-
-    getPercent: function (current, previous) {
-      return parseFloat(Math.round(((current - previous) / previous) * 100 * 100) / 100).toFixed(2)
-    }
   },
+
   created: function () {
-    this.initialize()
-    this.setDefaultChartDate()
-    let interval = 60 * 1000 // 1 minute
-    let delay = (interval - new Date() % interval) + 2000 // Every Minute and 2 seconds
-    setTimeout(() => {
-      this.initialize()
-      setInterval(() => this.initialize(), interval)
-    }, delay)
   }
 }
 </script>
