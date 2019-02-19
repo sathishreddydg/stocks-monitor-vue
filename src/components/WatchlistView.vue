@@ -4,7 +4,7 @@
       <v-flex v-for="stock in stockData" :key="stock.quote.symbol" sm12 md6 xl4>
         <v-card :class="stock.quote.change<0?'card-theme-red':'card-theme-green'">
           <card-header :quote="stock.quote"></card-header>
-          <small-chart :chart-data='stock.chartData'></small-chart>
+          <small-chart :chart='stock.chartData' :quote="stock.quote"></small-chart>
         </v-card>
       </v-flex>
     </v-layout>
