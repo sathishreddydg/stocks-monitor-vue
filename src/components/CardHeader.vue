@@ -1,9 +1,10 @@
 <template>
   <v-layout row wrap pl-1 pt-1 pr-1>
     <v-flex sm3>
-      <span class="subheading">{{quote.symbol}}&nbsp;&nbsp;&nbsp;</span>
-      <!--TODO: make it tool tip-->
-      <!-- <span class="caption">{{quote.companyName.length>20?quote.companyName.substr(0,17)+'...':quote.companyName}}</span> -->
+      <v-tooltip top>
+      <span slot="activator" class="subheading">{{quote.symbol}}&nbsp;&nbsp;&nbsp;</span>
+      <span class="caption">{{quote.companyName}}</span>
+      </v-tooltip>
       <span class="subheading">{{quote.latestPrice}}</span><br>
       <span class="subheading" :class="quote.change<0?'red--text':'green--text'">{{quote.percent}}% </span>
       <span class="body-1" :class="quote.change<0?'red--text':'green--text'">&nbsp;({{quote.change}})</span>
@@ -55,9 +56,15 @@
       <span class="body-1">{{quote.peRatio}}</span>
     </v-flex>
     <v-flex sm1>
-      <v-btn icon :href="'https://finance.yahoo.com/chart/'+quote.symbol" target="_blank">
+
+      <a :href="'https://finance.yahoo.com/chart/'+quote.symbol" target="_blank">Yahoo</a><br>
+      <a :href="'https://www.barchart.com/stocks/quotes/'+quote.symbol+'/options'" target="_blank">Barchart</a>
+      <!-- <v-btn icon :href="'https://finance.yahoo.com/chart/'+quote.symbol" target="_blank">
         <v-icon>send</v-icon>
       </v-btn>
+      <v-btn icon :href="'https://finance.yahoo.com/chart/'+quote.symbol" target="_blank">
+        <v-icon>send</v-icon>
+      </v-btn> -->
     </v-flex>
   </v-layout>
 </template>
